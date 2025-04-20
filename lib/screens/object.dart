@@ -10,7 +10,17 @@ import 'package:path_provider/path_provider.dart';
 import 'camera_view.dart';
 import 'painters/object_detector_painter.dart';
 
+enum TypeTrain {
+  int8,
+  float16,
+  float32,
+}
+
 class ObjectDetectorView extends StatefulWidget {
+  final TypeTrain typeTrain;
+
+  const ObjectDetectorView({super.key, this.typeTrain = TypeTrain.int8});
+
   @override
   State<ObjectDetectorView> createState() => _ObjectDetectorView();
 }
@@ -74,10 +84,12 @@ class _ObjectDetectorView extends State<ObjectDetectorView> {
 
     // uncomment next lines if you want to use a local model
     // make sure to add tflite model to assets/ml
-    final path = 'assets/best_int8.tflite';
-    // final path = 'assets/best_float16.tflite';
-    // final path = 'assets/best_float32.tflite';
-    // final path = 'assets/best_int8.tflite';
+    String path = 'assets/best_int8.tflite';
+    if (widget.typeTrain == TypeTrain.float32) {
+      path = 'assets/best_float32.tflite';
+    } else if (widget.typeTrain == TypeTrain.float16) {
+      path = 'assets/best_float16.tflite';
+    }
     final modelPath = await getModelPath(path);
     final options = LocalObjectDetectorOptions(
       mode: mode,
@@ -121,7 +133,7 @@ class _ObjectDetectorView extends State<ObjectDetectorView> {
       String text = 'Objects found: ${objects.length}\n\n';
       for (final object in objects) {
         text +=
-        'Object:  trackingId: ${object.trackingId} - ${object.labels.map((e) => e.text)}\n\n';
+            'Object:  trackingId: ${object.trackingId} - ${object.labels.map((e) => e.text)}\n\n';
       }
       _text = text;
       // TODO: set _customPaint to draw boundingRect on top of image
@@ -144,5 +156,4 @@ class _ObjectDetectorView extends State<ObjectDetectorView> {
     }
     return file.path;
   }
-
 }
