@@ -6,24 +6,28 @@ import 'package:google_mlkit_commons/google_mlkit_commons.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../main.dart';
+import '../utils.dart';
 
 enum ScreenMode { liveFeed, gallery }
 
 class CameraView extends StatefulWidget {
   CameraView(
       {Key? key,
-        required this.title,
-        required this.customPaint,
-        this.text,
-        //required this.onImage,
-        this.onScreenModeChanged,
-        this.initialDirection = CameraLensDirection.back, required this.onImage})
+      required this.title,
+      required this.customPaint,
+      this.text,
+      //required this.onImage,
+      this.onScreenModeChanged,
+      this.initialDirection = CameraLensDirection.back,
+      required this.onStop,
+      required this.onImage})
       : super(key: key);
 
   final String title;
   final CustomPaint? customPaint;
   final String? text;
   final Function(InputImage inputImage) onImage;
+  final Function() onStop;
   final Function(ScreenMode mode)? onScreenModeChanged;
   final CameraLensDirection initialDirection;
 
@@ -49,14 +53,11 @@ class _CameraViewState extends State<CameraView> {
     _imagePicker = ImagePicker();
 
     if (cameras.any(
-          (element) =>
-      element.lensDirection == widget.initialDirection &&
-          element.sensorOrientation == 90,
+      (element) => element.lensDirection == widget.initialDirection && element.sensorOrientation == 90,
     )) {
       _cameraIndex = cameras.indexOf(
-        cameras.firstWhere((element) =>
-        element.lensDirection == widget.initialDirection &&
-            element.sensorOrientation == 90),
+        cameras.firstWhere(
+            (element) => element.lensDirection == widget.initialDirection && element.sensorOrientation == 90),
       );
     } else {
       for (var i = 0; i < cameras.length; i++) {
@@ -94,9 +95,7 @@ class _CameraViewState extends State<CameraView> {
                 child: Icon(
                   _mode == ScreenMode.liveFeed
                       ? Icons.photo_library_outlined
-                      : (Platform.isIOS
-                      ? Icons.camera_alt_outlined
-                      : Icons.camera),
+                      : (Platform.isIOS ? Icons.camera_alt_outlined : Icons.camera),
                 ),
               ),
             ),
@@ -117,9 +116,7 @@ class _CameraViewState extends State<CameraView> {
         child: FloatingActionButton(
           onPressed: _switchLiveCamera,
           child: Icon(
-            Platform.isIOS
-                ? Icons.flip_camera_ios_outlined
-                : Icons.flip_camera_android_outlined,
+            Platform.isIOS ? Icons.flip_camera_ios_outlined : Icons.flip_camera_android_outlined,
             size: 40,
           ),
         ));
@@ -160,8 +157,8 @@ class _CameraViewState extends State<CameraView> {
             child: Center(
               child: _changingCameraLens
                   ? Center(
-                child: const Text('Changing camera lens'),
-              )
+                      child: const Text('Changing camera lens'),
+                    )
                   : CameraPreview(_controller!),
             ),
           ),
@@ -180,9 +177,23 @@ class _CameraViewState extends State<CameraView> {
                   _controller!.setZoomLevel(zoomLevel);
                 });
               },
-              divisions: (maxZoomLevel - 1).toInt() < 1
-                  ? null
-                  : (maxZoomLevel - 1).toInt(),
+              divisions: (maxZoomLevel - 1).toInt() < 1 ? null : (maxZoomLevel - 1).toInt(),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: InkWell(
+              onTap: () async {
+                _controller?.pausePreview();
+                widget.onStop();
+              },
+              child: Container(
+                height: 60,
+                color: Colors.cyan,
+                width: 120,
+                child: Text('Stop record'),
+              ),
             ),
           )
         ],
@@ -194,20 +205,20 @@ class _CameraViewState extends State<CameraView> {
     return ListView(shrinkWrap: true, children: [
       _image != null
           ? SizedBox(
-        height: 400,
-        width: 400,
-        child: Stack(
-          fit: StackFit.expand,
-          children: <Widget>[
-            Image.file(_image!),
-            if (widget.customPaint != null) widget.customPaint!,
-          ],
-        ),
-      )
+              height: 400,
+              width: 400,
+              child: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  Image.file(_image!),
+                  if (widget.customPaint != null) widget.customPaint!,
+                ],
+              ),
+            )
           : Icon(
-        Icons.image,
-        size: 200,
-      ),
+              Icons.image,
+              size: 200,
+            ),
       Padding(
         padding: EdgeInsets.symmetric(horizontal: 16),
         child: ElevatedButton(
@@ -225,8 +236,7 @@ class _CameraViewState extends State<CameraView> {
       if (_image != null)
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Text(
-              '${_path == null ? '' : 'Image path: $_path'}\n\n${widget.text ?? ''}'),
+          child: Text('${_path == null ? '' : 'Image path: $_path'}\n\n${widget.text ?? ''}'),
         ),
     ]);
   }
@@ -265,9 +275,7 @@ class _CameraViewState extends State<CameraView> {
       // Set to ResolutionPreset.high. Do NOT set it to ResolutionPreset.max because for some phones does NOT work.
       ResolutionPreset.high,
       enableAudio: false,
-      imageFormatGroup: Platform.isAndroid
-          ? ImageFormatGroup.nv21
-          : ImageFormatGroup.bgra8888,
+      imageFormatGroup: Platform.isAndroid ? ImageFormatGroup.nv21 : ImageFormatGroup.bgra8888,
     );
     _controller?.initialize().then((_) {
       if (!mounted) {
@@ -322,8 +330,7 @@ class _CameraViewState extends State<CameraView> {
   InputImage? _inputImageFromCameraImage(CameraImage image) {
     // get camera rotation
     final camera = cameras[_cameraIndex];
-    final rotation =
-    InputImageRotationValue.fromRawValue(camera.sensorOrientation);
+    final rotation = InputImageRotationValue.fromRawValue(camera.sensorOrientation);
     if (rotation == null) return null;
 
     // get image format

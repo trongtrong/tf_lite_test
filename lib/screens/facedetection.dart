@@ -40,7 +40,7 @@ class _FaceDetectorViewState extends State<FaceDetectorView> {
       onImage: (inputImage) {
         processImage(inputImage);
       },
-      initialDirection: CameraLensDirection.front,
+      initialDirection: CameraLensDirection.front, onStop: () {  },
     );
   }
 
