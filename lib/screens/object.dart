@@ -75,38 +75,38 @@ class _ObjectDetectorView extends State<ObjectDetectorView> {
 
 
 
-        final cmd = <String>[];
+        // final cmd = <String>[];
         //ffmpeg -framerate 30 -i image%04d.jpg -c:v libx264 -r 30 -pix_fmt yuv420p output_video.mp4
-        cmd.add("-framerate");
-        cmd.add('30');
-        cmd.add('-i');
-        final directory = await getTemporaryDirectory();
-        cmd.add('${directory.path}/frame_%05d.jpg');
+        // cmd.add("-framerate");
+        // cmd.add('30');
+        // cmd.add('-i');
+        // final directory = await getTemporaryDirectory();
+        // cmd.add('${directory.path}/frame_%05d.jpg');
 
         // await directory.list().forEach((element) {
         // });
-        cmd.add('-c:v');
-        cmd.add('mpeg4');
-        cmd.add('-r');
-        cmd.add('30');
-        cmd.add('-safe');
-        cmd.add('0');
-        cmd.add('${directory.path}/output.mp4');
+        // cmd.add('-c:v');
+        // cmd.add('mpeg4');
+        // cmd.add('-r');
+        // cmd.add('30');
+        // cmd.add('-safe');
+        // cmd.add('0');
+        // cmd.add('${directory.path}/output.mp4');
 
-        print('cmd ==        $cmd');
+        // print('cmd ==        $cmd');
 
-        FFmpegKit.executeWithArgumentsAsync(
-          cmd,
-          (session) {
-            if (session.getReturnCode() == 0) {
-              print('Video created');
-            } else {}
-          },
-          (log) {
-            print('log ===   ${log.getMessage()}');
-          },
-          (statistics) {},
-        );
+        // FFmpegKit.executeWithArgumentsAsync(
+        //   cmd,
+        //   (session) {
+        //     if (session.getReturnCode() == 0) {
+        //       print('Video created');
+        //     } else {}
+        //   },
+        //   (log) {
+        //     print('log ===   ${log.getMessage()}');
+        //   },
+        //   (statistics) {},
+        // );
       },
     );
   }
@@ -135,7 +135,7 @@ class _ObjectDetectorView extends State<ObjectDetectorView> {
 
     // uncomment next lines if you want to use a local model
     // make sure to add tflite model to assets/ml
-    String path = 'assets/object_labeler.tflite';
+    String path = 'assets/football_detection_model.tflite';
     if (widget.typeTrain == TypeTrain.float32) {
       path = 'assets/best_float32.tflite';
     } else if (widget.typeTrain == TypeTrain.float16) {
