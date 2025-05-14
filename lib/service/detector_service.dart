@@ -171,7 +171,7 @@ class Detector {
 /// allows us to use plugins from background isolates.
 class _DetectorServer {
   /// Input size of image (height = width = 300)
-  static const int mlModelInputSize = 300;
+  static const int mlModelInputSize = 320;
 
   /// Result confidence threshold
   static const double confidence = 0.5;
@@ -282,11 +282,13 @@ class _DetectorServer {
         .toList();
 
     // Classes
-    final classesRaw = output.elementAt(1).first as List<double>;
+    // final classesRaw = output.elementAt(1).first as List<double>;
+    final classesRaw = (output.elementAt(1).first as List<num>).map((e) => e.toDouble()).toList();
     final classes = classesRaw.map((value) => value.toInt()).toList();
 
     // Scores
-    final scores = output.elementAt(2).first as List<double>;
+    // final scores = output.elementAt(2).first as List<double>;
+    final scores = (output.elementAt(2).first as List<num>).map((e) => e.toDouble()).toList();
 
     // Number of detections
     final numberOfDetectionsRaw = output.last.first as double;
@@ -340,10 +342,17 @@ class _DetectorServer {
     // Classes: [1, 10],
     // Scores: [1, 10],
     // Number of detections: [1]
+    // final output = {
+    //   0: [List<List<num>>.filled(10, List<num>.filled(4, 0))],
+    //   1: [List<num>.filled(10, 0)],
+    //   2: [List<num>.filled(10, 0)],
+    //   3: [0.0],
+    // };
+
     final output = {
-      0: [List<List<num>>.filled(10, List<num>.filled(4, 0))],
-      1: [List<num>.filled(10, 0)],
-      2: [List<num>.filled(10, 0)],
+      0: [List<List<num>>.filled(5, List<num>.filled(2100, 0))], // Adjusted shape
+      1: [List<num>.filled(5, 0)],
+      2: [List<num>.filled(5, 0)],
       3: [0.0],
     };
 
