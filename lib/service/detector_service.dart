@@ -85,15 +85,13 @@ class Detector {
 
   // // Similarly, StreamControllers are stored in a queue so they can be handled
   // // asynchronously and serially.
-  final StreamController<Map<String, dynamic>> resultsStream =
-      StreamController<Map<String, dynamic>>();
+  final StreamController<Map<String, dynamic>> resultsStream = StreamController<Map<String, dynamic>>();
 
   /// Open the database at [path] and launch the server on a background isolate..
   static Future<Detector> start() async {
     final ReceivePort receivePort = ReceivePort();
     // sendPort - To be used by service Isolate to send message to our ReceiverPort
-    final Isolate isolate =
-        await Isolate.spawn(_DetectorServer._run, receivePort.sendPort);
+    final Isolate isolate = await Isolate.spawn(_DetectorServer._run, receivePort.sendPort);
 
     final Detector result = Detector._(
       isolate,
@@ -210,8 +208,7 @@ class _DetectorServer {
         // obtained on the root isolate and passed into the background isolate via
         // a [SendPort].
         // ----------------------------------------------------------------------
-        RootIsolateToken rootIsolateToken =
-            command.args?[0] as RootIsolateToken;
+        RootIsolateToken rootIsolateToken = command.args?[0] as RootIsolateToken;
         // ----------------------------------------------------------------------
         // [BackgroundIsolateBinaryMessenger.ensureInitialized] for each
         // background isolate that will use plugins. This sets up the
@@ -245,10 +242,8 @@ class _DetectorServer {
     });
   }
 
-  Map<String, dynamic> analyseImage(
-      image_lib.Image? image, int preConversionTime) {
-    var conversionElapsedTime =
-        DateTime.now().millisecondsSinceEpoch - preConversionTime;
+  Map<String, dynamic> analyseImage(image_lib.Image? image, int preConversionTime) {
+    var conversionElapsedTime = DateTime.now().millisecondsSinceEpoch - preConversionTime;
 
     var preProcessStart = DateTime.now().millisecondsSinceEpoch;
 
@@ -272,8 +267,7 @@ class _DetectorServer {
       ),
     );
 
-    var preProcessElapsedTime =
-        DateTime.now().millisecondsSinceEpoch - preProcessStart;
+    var preProcessElapsedTime = DateTime.now().millisecondsSinceEpoch - preProcessStart;
 
     var inferenceTimeStart = DateTime.now().millisecondsSinceEpoch;
 
@@ -318,11 +312,9 @@ class _DetectorServer {
       }
     }
 
-    var inferenceElapsedTime =
-        DateTime.now().millisecondsSinceEpoch - inferenceTimeStart;
+    var inferenceElapsedTime = DateTime.now().millisecondsSinceEpoch - inferenceTimeStart;
 
-    var totalElapsedTime =
-        DateTime.now().millisecondsSinceEpoch - preConversionTime;
+    var totalElapsedTime = DateTime.now().millisecondsSinceEpoch - preConversionTime;
 
     return {
       "recognitions": recognitions,
