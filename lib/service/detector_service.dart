@@ -85,15 +85,13 @@ class Detector {
 
   // // Similarly, StreamControllers are stored in a queue so they can be handled
   // // asynchronously and serially.
-  final StreamController<Map<String, dynamic>> resultsStream =
-      StreamController<Map<String, dynamic>>();
+  final StreamController<Map<String, dynamic>> resultsStream = StreamController<Map<String, dynamic>>();
 
   /// Open the database at [path] and launch the server on a background isolate..
   static Future<Detector> start() async {
     final ReceivePort receivePort = ReceivePort();
     // sendPort - To be used by service Isolate to send message to our ReceiverPort
-    final Isolate isolate =
-        await Isolate.spawn(_DetectorServer._run, receivePort.sendPort);
+    final Isolate isolate = await Isolate.spawn(_DetectorServer._run, receivePort.sendPort);
 
     final Detector result = Detector._(
       isolate,
@@ -173,7 +171,7 @@ class Detector {
 /// allows us to use plugins from background isolates.
 class _DetectorServer {
   /// Input size of image (height = width = 300)
-  static const int mlModelInputSize = 300;
+  static const int mlModelInputSize = 320;
 
   /// Result confidence threshold
   static const double confidence = 0.5;
@@ -210,8 +208,7 @@ class _DetectorServer {
         // obtained on the root isolate and passed into the background isolate via
         // a [SendPort].
         // ----------------------------------------------------------------------
-        RootIsolateToken rootIsolateToken =
-            command.args?[0] as RootIsolateToken;
+        RootIsolateToken rootIsolateToken = command.args?[0] as RootIsolateToken;
         // ----------------------------------------------------------------------
         // [BackgroundIsolateBinaryMessenger.ensureInitialized] for each
         // background isolate that will use plugins. This sets up the
@@ -245,10 +242,8 @@ class _DetectorServer {
     });
   }
 
-  Map<String, dynamic> analyseImage(
-      image_lib.Image? image, int preConversionTime) {
-    var conversionElapsedTime =
-        DateTime.now().millisecondsSinceEpoch - preConversionTime;
+  Map<String, dynamic> analyseImage(image_lib.Image? image, int preConversionTime) {
+    var conversionElapsedTime = DateTime.now().millisecondsSinceEpoch - preConversionTime;
 
     var preProcessStart = DateTime.now().millisecondsSinceEpoch;
 
@@ -272,8 +267,7 @@ class _DetectorServer {
       ),
     );
 
-    var preProcessElapsedTime =
-        DateTime.now().millisecondsSinceEpoch - preProcessStart;
+    var preProcessElapsedTime = DateTime.now().millisecondsSinceEpoch - preProcessStart;
 
     var inferenceTimeStart = DateTime.now().millisecondsSinceEpoch;
 
@@ -288,11 +282,13 @@ class _DetectorServer {
         .toList();
 
     // Classes
-    final classesRaw = output.elementAt(1).first as List<double>;
+    // final classesRaw = output.elementAt(1).first as List<double>;
+    final classesRaw = (output.elementAt(1).first as List<num>).map((e) => e.toDouble()).toList();
     final classes = classesRaw.map((value) => value.toInt()).toList();
 
     // Scores
-    final scores = output.elementAt(2).first as List<double>;
+    // final scores = output.elementAt(2).first as List<double>;
+    final scores = (output.elementAt(2).first as List<num>).map((e) => e.toDouble()).toList();
 
     // Number of detections
     final numberOfDetectionsRaw = output.last.first as double;
@@ -318,11 +314,9 @@ class _DetectorServer {
       }
     }
 
-    var inferenceElapsedTime =
-        DateTime.now().millisecondsSinceEpoch - inferenceTimeStart;
+    var inferenceElapsedTime = DateTime.now().millisecondsSinceEpoch - inferenceTimeStart;
 
-    var totalElapsedTime =
-        DateTime.now().millisecondsSinceEpoch - preConversionTime;
+    var totalElapsedTime = DateTime.now().millisecondsSinceEpoch - preConversionTime;
 
     return {
       "recognitions": recognitions,
@@ -348,10 +342,17 @@ class _DetectorServer {
     // Classes: [1, 10],
     // Scores: [1, 10],
     // Number of detections: [1]
+    // final output = {
+    //   0: [List<List<num>>.filled(10, List<num>.filled(4, 0))],
+    //   1: [List<num>.filled(10, 0)],
+    //   2: [List<num>.filled(10, 0)],
+    //   3: [0.0],
+    // };
+
     final output = {
-      0: [List<List<num>>.filled(10, List<num>.filled(4, 0))],
-      1: [List<num>.filled(10, 0)],
-      2: [List<num>.filled(10, 0)],
+      0: [List<List<num>>.filled(5, List<num>.filled(2100, 0))], // Adjusted shape
+      1: [List<num>.filled(5, 0)],
+      2: [List<num>.filled(5, 0)],
       3: [0.0],
     };
 
